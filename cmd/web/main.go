@@ -61,7 +61,7 @@ func main() {
 	mux.HandleFunc("GET /snippet/create", snippetCreate)
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
 	mux.HandleFunc("GET /drawing/{name}", getDrawingByName)
-
+	mux.HandleFunc("POST /drawing/{$}", postDrawing)
 	logger.Info("starting server", slog.String("addr", *addr))
 
 	err := http.ListenAndServe(*addr, mux)

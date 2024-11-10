@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -11,6 +12,11 @@ import (
 	"strings"
 	"text/template"
 )
+
+type ExcalidrawDrawing struct {
+	Name        string                 `json:"name"`
+	DrawingJson map[string]interface{} `json:"drawingJson"`
+}
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
@@ -64,3 +70,61 @@ func getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte(drawing))
 }
+
+func postDrawing(w http.ResponseWriter, r *http.Request) {
+	//respond with error if file exists
+	drawing := ExcalidrawDrawing{}
+	err := json.NewDecoder(r.Body).Decode(&drawing)
+	//if file json cannot be parsed
+	if err != nil {
+		slog.Error(err.Error(), "reason", "failed to parse json")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	drawingPathName := "./drawings/" + drawing.Name + ".txt"
+	var file *os.File = nil
+	// check for file existence
+	_, err = os.Stat(drawingPathName)
+	// file doesn't exist, create
+	if err != nil {
+		file, err = os.Create(drawingPathName)
+		if err != nil {
+			fmt.Println(err)
+			slog.Error(err.Error())
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		//file exists already return error
+		slog.Info("file exists", slog.String("fileName", drawingPathName))
+		http.Error(w, "name for drawing already exists", http.StatusConflict)
+		return
+	}
+	defer file.Close()
+
+	unMarshaledDrawing, err := json.Marshal(&drawing)
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = file.Write(unMarshaledDrawing)
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Write([]byte("success"))
+}
+
+// func validateExcalidrawDrawing(drawingInfo *ExcalidrawDrawing) bool{
+// 	drawing := drawingInfo.DrawingJson
+// 	val, ok := drawing["type"]
+// 	if !ok {
+// 		return false
+// 	}
+
+// 	return
+// }
