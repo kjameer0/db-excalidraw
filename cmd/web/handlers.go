@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 	"text/template"
@@ -50,4 +53,14 @@ func neuter(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+func getDrawingByName(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	name = path.Clean(name)
+	drawing, err := os.ReadFile("./drawings/" + name + ".txt")
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+	w.Write([]byte(drawing))
 }

@@ -4,11 +4,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 )
+
+// Define an application struct to hold the application-wide dependencies for the // web application.
+type application struct {
+	logger *slog.Logger
+}
 
 type fileWriter struct{}
 
@@ -30,7 +36,7 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 		log.Printf("Error writing to file %s: %v\n", logFile, writeErr)
 		return 0, writeErr
 	}
-	
+
 	return bytesWritten, nil
 }
 
@@ -41,7 +47,7 @@ func main() {
 	//to the url that matches their path
 	mux := http.NewServeMux()
 	writer := &fileWriter{}
-	logger := slog.New(slog.NewJSONHandler(writer, nil))
+	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
 	slog.SetDefault(logger)
 	// the file server with assets comes from a specific folder
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
@@ -54,6 +60,7 @@ func main() {
 	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
 	mux.HandleFunc("GET /snippet/create", snippetCreate)
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	mux.HandleFunc("GET /drawing/{name}", getDrawingByName)
 
 	logger.Info("starting server", slog.String("addr", *addr))
 
