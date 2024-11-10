@@ -63,7 +63,7 @@ func neuter(next http.Handler) http.Handler {
 func getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	name = path.Clean(name)
-	drawing, err := os.ReadFile("./drawings/" + name + ".txt")
+	drawing, err := os.ReadFile("./drawings/" + name + ".json")
 	if err != nil {
 		slog.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -81,8 +81,12 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	drawingPathName := "./drawings/" + drawing.Name + ".txt"
+	if !validateExcalidrawDrawing(&drawing) {
+		slog.Error("failed to validate excalidraw drawing")
+		http.Error(w, "invalid excalidraw drawing", http.StatusInternalServerError)
+		return
+	}
+	drawingPathName := "./drawings/" + drawing.Name + ".json"
 	var file *os.File = nil
 	// check for file existence
 	_, err = os.Stat(drawingPathName)
@@ -119,12 +123,31 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-// func validateExcalidrawDrawing(drawingInfo *ExcalidrawDrawing) bool{
-// 	drawing := drawingInfo.DrawingJson
-// 	val, ok := drawing["type"]
-// 	if !ok {
-// 		return false
-// 	}
+func validateExcalidrawDrawing(drawingInfo *ExcalidrawDrawing) bool {
+	drawing := drawingInfo.DrawingJson
+	drawingType, ok := drawing["type"]
+	if !ok {
+		return false
+	}
 
-// 	return
-// }
+	drawingTypeString, ok := drawingType.(string)
+	if !ok {
+		slog.Error("drawing.type is not a string")
+		return false
+	}
+
+	if !(strings.Contains(drawingTypeString, "excalidraw")) {
+		return false
+	}
+
+	elements, ok := drawing["elements"]
+	if !ok {
+		return false
+	}
+
+	_, ok = elements.([]interface{})
+	if !ok {
+		return false
+	}
+	return true
+}
