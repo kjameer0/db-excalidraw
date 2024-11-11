@@ -64,7 +64,14 @@ func getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
-	drawing, err := os.ReadFile("./drawings/" + name + ".json")
+	pathName := "./drawings/" + name + ".json"
+	_, err := os.Stat(pathName)
+	if os.IsNotExist(err) {
+		slog.Info("file does not exist GET /drawing/{name} " + name)
+		http.NotFound(w, r)
+		return
+	}
+	drawing, err := os.ReadFile(pathName)
 	if err != nil {
 		slog.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
