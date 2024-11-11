@@ -62,6 +62,7 @@ func neuter(next http.Handler) http.Handler {
 }
 func getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
 	drawing, err := os.ReadFile("./drawings/" + name + ".json")
 	if err != nil {
@@ -75,6 +76,7 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 	//respond with error if file exists
 	drawing := ExcalidrawDrawing{}
 	err := json.NewDecoder(r.Body).Decode(&drawing)
+	drawing.Name = strings.ReplaceAll(drawing.Name, "/", "-")
 	//if file json cannot be parsed
 	if err != nil {
 		slog.Error(err.Error(), "reason", "failed to parse json")
