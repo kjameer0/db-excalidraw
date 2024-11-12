@@ -8,9 +8,10 @@ import (
 	"os"
 )
 
-// run this fucntion will the server is running to test the uncompression on the server
-func test_compression() {
-	file := "test.json"
+// run this fucntion while the server is running to test the uncompression on the server
+func TestCompression() {
+	fmt.Println(("compress"))
+	file := "./drawings/test.json"
 	data, err := os.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Falied to read: %s", err)

@@ -1,19 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"strings"
-	"text/template"
 )
 
 type ExcalidrawDrawing struct {
@@ -24,19 +21,21 @@ type ExcalidrawDrawing struct {
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 	// base template must always come first in slice
-	files := []string{"./ui/html/base.tmpl.html", "./ui/html/pages/home.tmpl", "./ui/html/partials/nav.tmpl"}
-	templateSet, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	// nil in Execute means there is no custom data to add to the template
-	err = templateSet.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	TestCompression()
+	// files := []string{"./ui/html/base.tmpl.html", "./ui/html/pages/home.tmpl", "./ui/html/partials/nav.tmpl"}
+	// templateSet, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	log.Print(err.Error())
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+	// // nil in Execute means there is no custom data to add to the template
+	// err = templateSet.ExecuteTemplate(w, "base", nil)
+	// if err != nil {
+	// 	log.Print(err.Error())
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// }
+	w.Write([]byte("compression"))
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
@@ -117,14 +116,14 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	unMarshaledDrawing, err := json.Marshal(&drawing)
+	marshaledDrawing, err := json.Marshal(&drawing)
 	if err != nil {
 		slog.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	_, err = file.Write(unMarshaledDrawing)
+	_, err = file.Write(marshaledDrawing)
 	if err != nil {
 		slog.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -162,17 +161,17 @@ func postCompressedDrawing(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
+	fmt.Println((string(bodyBytes)[:400]))
 
 	// respond with error if file exists
 	drawing := ExcalidrawDrawing{}
-	err = json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&drawing)
+	err = json.Unmarshal(bodyBytes, &drawing)
 	drawing.Name = strings.ReplaceAll(drawing.Name, "/", "-")
 	if err != nil {
 		slog.Error(err.Error(), "reason", "failed to parse json")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
 	if !validateExcalidrawDrawing(&drawing) {
 		slog.Error("failed to validate excalidraw drawing")
 		http.Error(w, "invalid excalidraw drawing", http.StatusInternalServerError)
@@ -216,6 +215,7 @@ func postCompressedDrawing(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateExcalidrawDrawing(drawingInfo *ExcalidrawDrawing) bool {
+	fmt.Printf("Drawing %s\n****\n", drawingInfo.DrawingJson)
 	drawing := drawingInfo.DrawingJson
 	drawingType, ok := drawing["type"]
 	if !ok {
@@ -238,8 +238,5 @@ func validateExcalidrawDrawing(drawingInfo *ExcalidrawDrawing) bool {
 	}
 
 	_, ok = elements.([]interface{})
-	if !ok {
-		return false
-	}
-	return true
+	return ok
 }

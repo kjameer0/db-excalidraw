@@ -20,7 +20,7 @@ type fileWriter struct{}
 
 func (f *fileWriter) Write(p []byte) (n int, err error) {
 	logFile := "log.txt"
-	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("Failure to open %s", logFile)
 		return 0, err
