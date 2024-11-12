@@ -20,7 +20,7 @@ type fileWriter struct{}
 
 func (f *fileWriter) Write(p []byte) (n int, err error) {
 	logFile := "log.txt"
-	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		log.Printf("Failure to open %s", logFile)
 		return 0, err
@@ -43,8 +43,8 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
-	//mux is the part of the app that guides requests
-	//to the url that matches their path
+	// mux is the part of the app that guides requests
+	// to the url that matches their path
 	mux := http.NewServeMux()
 	writer := &fileWriter{}
 	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
@@ -62,6 +62,7 @@ func main() {
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
 	mux.HandleFunc("GET /drawing/{name}", getDrawingByName)
 	mux.HandleFunc("POST /drawing/{$}", postDrawing)
+	mux.HandleFunc("POST /compressed/drawing", postCompressedDrawing)
 	logger.Info("starting server", slog.String("addr", *addr))
 
 	err := http.ListenAndServe(*addr, mux)
