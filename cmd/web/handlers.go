@@ -129,6 +129,7 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+	//make more specific response
 	w.Write([]byte("success"))
 }
 
