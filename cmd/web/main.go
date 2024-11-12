@@ -43,8 +43,8 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
-	//mux is the part of the app that guides requests
-	//to the url that matches their path
+	// mux is the part of the app that guides requests
+	// to the url that matches their path
 	mux := http.NewServeMux()
 	writer := &fileWriter{}
 	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
@@ -62,6 +62,7 @@ func main() {
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
 	mux.HandleFunc("GET /drawing/{name}", getDrawingByName)
 	mux.HandleFunc("POST /drawing/{$}", postDrawing)
+	mux.HandleFunc("POST /compressed/drawing", postCompressedDrawing)
 	logger.Info("starting server", slog.String("addr", *addr))
 
 	err := http.ListenAndServe(*addr, mux)
