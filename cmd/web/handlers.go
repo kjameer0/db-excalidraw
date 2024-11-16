@@ -11,6 +11,8 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	internal "github.com/kjameer0/db-excalidraw/internal"
 )
 
 type ExcalidrawDrawing struct {
@@ -22,6 +24,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 	// base template must always come first in slice
 	TestCompression()
+	fmt.Println(internal.GenerateShortKey())
 	// files := []string{"./ui/html/base.tmpl.html", "./ui/html/pages/home.tmpl", "./ui/html/partials/nav.tmpl"}
 	// templateSet, err := template.ParseFiles(files...)
 	// if err != nil {
