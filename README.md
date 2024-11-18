@@ -8,6 +8,26 @@ If you are using VSCode to edit, you can download the [Excalidraw extension](htt
 
 ## Stack
 
+1. Postgres
+2. Golang
+3. NextJS
+4. Amazon S3
+5. Excalidraw
+
+## Setting Up Postgres
+
+To set up the database you might need to download psql.
+`psql -f internal/db/schema.sql`
+
+You might have to play around with your user permissions to get this file to run.
+
+You can seed the database with this command
+`psql -d excalidb -f internal/database/seed.sql`
+
+Full command:
+
+`psql -f internal/database/schema.sql;psql -d excalidb -f internal/database/seed.sql`
+
 ## Copying Drawing
 
 If you have the `jq` command installed on your Unix system, you can run something like:

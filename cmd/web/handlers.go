@@ -113,6 +113,7 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	drawingPathName := "./drawings/" + drawing.Name + ".json"
+	
 	var file *os.File = nil
 	// check for file existence
 	_, err = os.Stat(drawingPathName)
