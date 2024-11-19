@@ -11,9 +11,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-
-	"github.com/google/uuid"
-	internal "github.com/kjameer0/db-excalidraw/internal"
 )
 
 type ExcalidrawDrawing struct {
@@ -23,29 +20,8 @@ type ExcalidrawDrawing struct {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
-	// base template must always come first in slice
-	TestCompression()
-	fmt.Println(internal.GenerateShortKey())
 
-	uuidV7, err := uuid.NewV7()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(uuidV7)
-	// files := []string{"./ui/html/base.tmpl.html", "./ui/html/pages/home.tmpl", "./ui/html/partials/nav.tmpl"}
-	// templateSet, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	log.Print(err.Error())
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	return
-	// }
-	// // nil in Execute means there is no custom data to add to the template
-	// err = templateSet.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	log.Print(err.Error())
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// }
-	w.Write([]byte("compression"))
+	w.Write([]byte("API is live"))
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +57,7 @@ func getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
-	pathName := "./drawings/" + name + ".json"
+	pathName := "./test-drawings/" + name + ".txt"
 	_, err := os.Stat(pathName)
 	if os.IsNotExist(err) {
 		slog.Info("file does not exist GET /drawing/{name} " + name)
@@ -113,7 +89,7 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	drawingPathName := "./drawings/" + drawing.Name + ".json"
-	
+
 	var file *os.File = nil
 	// check for file existence
 	_, err = os.Stat(drawingPathName)
