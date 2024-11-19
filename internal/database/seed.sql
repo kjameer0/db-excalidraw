@@ -9,3 +9,11 @@ INSERT INTO users (name, username, email, password) VALUES
 ('Henry Lee', 'henryl', 'henryl@example.com', 'lee987password'),
 ('Isla Taylor', 'islat', 'islat@example.com', 'taylorpass654'),
 ('Jack Wilson', 'jackw', 'jackw@example.com', 'wilsonsecure321');
+
+INSERT INTO drawings(nanoid, creator_id, title) VALUES
+('9RdQHB0yGzMEd9NyUVxSi', 1, 'test1'),
+('Go9ganqWSft18Lo7h2eu5', 1, 'test2'),
+('JqXOED8NS4NegsS6NYjc0', 3, 'test3'),
+('PgwS_za5D-N22v7OZq71F', 4, 'array1'),
+('uNjCygiJcEOLYxvEvMYFt', 3, 'binary tree-2'),
+('Z8hTzKF79FqL4C_SGLxxt', 3, 'binary tree-2');
