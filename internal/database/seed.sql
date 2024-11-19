@@ -1,5 +1,5 @@
 INSERT INTO users (name, username, email, password) VALUES
-    ('Peter Parker', 'webhead', 'parkerny@gmail.com', '12345678'),('Alice Johnson', 'alicej', 'alicej@example.com', 'password123'),
+('Peter Parker', 'webhead', 'parkerny@gmail.com', '12345678'),('Alice Johnson', 'alicej', 'alicej@example.com', 'password123'),
 ('Bob Smith', 'bobsmith', 'bobsmith@example.com', 'securepass456'),
 ('Catherine Davis', 'cathyd', 'cathyd@example.com', 'mypassword789'),
 ('David Brown', 'daveb', 'daveb@example.com', 'pass1234word'),
