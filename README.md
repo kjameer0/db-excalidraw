@@ -14,6 +14,14 @@ If you are using VSCode to edit, you can download the [Excalidraw extension](htt
 4. Amazon S3
 5. Excalidraw
 
+## Setting up Environment variables
+
+### Dev
+
+### Integration testing
+
+### Production
+
 ## Setting Up Postgres
 
 To set up the database you might need to download psql.

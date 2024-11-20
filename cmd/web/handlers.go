@@ -9,8 +9,9 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"strings"
+
+	"github.com/aidarkhanov/nanoid"
 )
 
 type ExcalidrawDrawing struct {
@@ -18,29 +19,29 @@ type ExcalidrawDrawing struct {
 	DrawingJson map[string]interface{} `json:"drawingJson"`
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 
 	w.Write([]byte("API is live"))
 }
 
-func snippetView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
-		return
-	}
-	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
-}
+// func snippetView(w http.ResponseWriter, r *http.Request) {
+// 	id, err := strconv.Atoi(r.PathValue("id"))
+// 	if err != nil || id < 1 {
+// 		http.NotFound(w, r)
+// 		return
+// 	}
+// 	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+// }
 
-func snippetCreate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Form for creating a new snippet"))
-}
+// func snippetCreate(w http.ResponseWriter, r *http.Request) {
+// 	w.Write([]byte("Form for creating a new snippet"))
+// }
 
-func snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Save a new snippet..."))
-}
+// func snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+// 	w.WriteHeader(http.StatusCreated)
+// 	w.Write([]byte("Save a new snippet..."))
+// }
 
 func neuter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +54,7 @@ func neuter(next http.Handler) http.Handler {
 	})
 }
 
-func getDrawingByName(w http.ResponseWriter, r *http.Request) {
+func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
@@ -72,8 +73,10 @@ func getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(drawing))
 }
 
-func postDrawing(w http.ResponseWriter, r *http.Request) {
+func (app *application) postDrawing(w http.ResponseWriter, r *http.Request) {
 	// respond with error if file exists
+	fileName := nanoid.New()
+	fmt.Println(fileName)
 	drawing := ExcalidrawDrawing{}
 	err := json.NewDecoder(r.Body).Decode(&drawing)
 	drawing.Name = strings.ReplaceAll(drawing.Name, "/", "-")
@@ -126,7 +129,7 @@ func postDrawing(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-func postCompressedDrawing(w http.ResponseWriter, r *http.Request) {
+func (app *application) postCompressedDrawing(w http.ResponseWriter, r *http.Request) {
 	var bodyReader io.ReadCloser
 	if r.Header.Get("Content-Encoding") == "gzip" {
 		gzipReader, err := gzip.NewReader(r.Body)

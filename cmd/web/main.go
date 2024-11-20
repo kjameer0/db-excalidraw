@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // Define an application struct to hold the application-wide dependencies for the // web application.
@@ -16,8 +18,23 @@ type application struct {
 	logger *slog.Logger
 }
 
-type fileWriter struct{}
+// for local writing during testing
+type fileWriter struct {
+	outputPath string
+}
 
+func init() {
+	// var drawingPath string
+	environment := os.Getenv("ENVIRONMENT")
+	if environment == "" {
+		err := godotenv.Load(".env.local")
+		environment = os.Getenv("ENVIRONMENT")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	fmt.Println("Program running in:", environment, "mode")
+}
 func (f *fileWriter) Write(p []byte) (n int, err error) {
 	logFile := "log.txt"
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -48,6 +65,7 @@ func main() {
 	mux := http.NewServeMux()
 	writer := &fileWriter{}
 	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
+	app := application{logger: logger}
 	slog.SetDefault(logger)
 	// the file server with assets comes from a specific folder
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
@@ -56,13 +74,10 @@ func main() {
 	// create a get route for all assets
 	mux.Handle("GET /static/", http.StripPrefix("/static", neuter(fileServer)))
 
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
-	mux.HandleFunc("GET /drawing/{name}", getDrawingByName)
-	mux.HandleFunc("POST /drawing/{$}", postDrawing)
-	mux.HandleFunc("POST /compressed/drawing", postCompressedDrawing)
+	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /drawing/{name}", app.getDrawingByName)
+	mux.HandleFunc("POST /drawing/{$}", app.postDrawing)
+	mux.HandleFunc("POST /compressed/drawing", app.postCompressedDrawing)
 	logger.Info("starting server", slog.String("addr", *addr))
 
 	err := http.ListenAndServe(*addr, mux)
