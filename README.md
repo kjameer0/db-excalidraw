@@ -14,7 +14,15 @@ If you are using VSCode to edit, you can download the [Excalidraw extension](htt
 4. Amazon S3
 5. Excalidraw
 
-## Setting up Environment variables
+## Setting up Environment
+
+You can use `nodemon` from `npm` to reload the server on file changes:
+`npx nodemon --exec go run ./cmd/web --signal SIGTERM -e go`
+
+You can add flags at the front of the command:
+`ENVIRONMENT="integration" npx nodemon --exec go run ./cmd/web --signal SIGTERM -e go`
+
+### Environment variables
 
 ### Dev
 

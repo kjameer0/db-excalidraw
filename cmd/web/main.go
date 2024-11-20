@@ -18,11 +18,6 @@ type application struct {
 	logger *slog.Logger
 }
 
-// for local writing during testing
-type fileWriter struct {
-	outputPath string
-}
-
 func init() {
 	// var drawingPath string
 	environment := os.Getenv("ENVIRONMENT")
@@ -35,8 +30,21 @@ func init() {
 	}
 	fmt.Println("Program running in:", environment, "mode")
 }
+
+// for local writing during testing
+type fileWriter struct {
+	outputPath string
+}
+
+type drawingUploader interface {
+	Upload(p []byte) (int, error)
+}
+type localDrawingUploader struct {
+	outputPath string
+}
+
 func (f *fileWriter) Write(p []byte) (n int, err error) {
-	logFile := "log.txt"
+	logFile := f.outputPath
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("Failure to open %s", logFile)
@@ -63,7 +71,7 @@ func main() {
 	// mux is the part of the app that guides requests
 	// to the url that matches their path
 	mux := http.NewServeMux()
-	writer := &fileWriter{}
+	writer := &fileWriter{outputPath: "log.txt"}
 	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
 	app := application{logger: logger}
 	slog.SetDefault(logger)
