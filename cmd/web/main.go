@@ -9,26 +9,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-
-	// "github.com/joho/godotenv"
 )
 
 // Define an application struct to hold the application-wide dependencies for the // web application.
 type application struct {
 	logger *slog.Logger
-}
-
-func init() {
-	// var drawingPath string
-	environment := os.Getenv("ENVIRONMENT")
-	// if environment == "" {
-	// 	err := godotenv.Load(".env.local")
-	// 	environment = os.Getenv("ENVIRONMENT")
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }
-	fmt.Println("Program running in:", environment, "mode")
 }
 
 // for local writing during testing
@@ -66,8 +51,10 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 }
 
 func main() {
+	environment := flag.String("env", "development", "HTTP network address")
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
+	fmt.Printf("Application running in %s mode\n", *environment)
 	// mux is the part of the app that guides requests
 	// to the url that matches their path
 	mux := http.NewServeMux()
