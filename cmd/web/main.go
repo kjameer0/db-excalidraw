@@ -22,7 +22,7 @@ func init() {
 	// var drawingPath string
 	environment := os.Getenv("ENVIRONMENT")
 	if environment == "" {
-		err := godotenv.Load(".env.local")
+		err := godotenv.Load("./.env.local")
 		environment = os.Getenv("ENVIRONMENT")
 		if err != nil {
 			log.Fatal(err)
@@ -83,6 +83,7 @@ func main() {
 	mux.Handle("GET /static/", http.StripPrefix("/static", neuter(fileServer)))
 
 	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /stream/{$}", app.streamHandler)
 	mux.HandleFunc("GET /drawing/{name}", app.getDrawingByName)
 	mux.HandleFunc("POST /drawing/{$}", app.postDrawing)
 	mux.HandleFunc("POST /compressed/drawing", app.postCompressedDrawing)

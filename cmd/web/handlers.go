@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/aidarkhanov/nanoid"
 )
@@ -54,79 +56,46 @@ func neuter(next http.Handler) http.Handler {
 	})
 }
 
+// TODO: Add error handling for edge cases
+// TODO: Add tests
 func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
+
 	pathName := "./test-drawings/" + name + ".txt"
-	_, err := os.Stat(pathName)
-	if os.IsNotExist(err) {
+	f, err := os.Open(pathName)
+	if err != nil {
+		//add user who did this failed get
 		slog.Info("file does not exist GET /drawing/{name} " + name)
 		http.NotFound(w, r)
 		return
 	}
-	drawing, err := os.ReadFile(pathName)
+	defer f.Close()
+
+	fileInfo, err := f.Stat()
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error("Failed to get file metadata" + pathName)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-	w.Write([]byte(drawing))
+	slog.Info("File transfer initiated", "fileByteSize", fileInfo.Size())
+
+	reader := bufio.NewReader(f)
+	// if we need more control over buffer size we can change io.copy to
+	//w.write and w.flush
+	_, err = io.Copy(w, reader)
+	if err != nil {
+		slog.Error("Error sending drawing to client", "route", "GET /drawing/{name}", "drawing", name)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (app *application) postDrawing(w http.ResponseWriter, r *http.Request) {
-	// respond with error if file exists
-	fileName := nanoid.New()
-	fmt.Println(fileName)
-	drawing := ExcalidrawDrawing{}
-	err := json.NewDecoder(r.Body).Decode(&drawing)
-	drawing.Name = strings.ReplaceAll(drawing.Name, "/", "-")
-	// if file json cannot be parsed
-	if err != nil {
-		slog.Error(err.Error(), "reason", "failed to parse json")
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	if !validateExcalidrawDrawing(&drawing) {
-		slog.Error("failed to validate excalidraw drawing")
-		http.Error(w, "invalid excalidraw drawing", http.StatusInternalServerError)
-		return
-	}
-	drawingPathName := "./drawings/" + drawing.Name + ".json"
+	id := nanoid.New()
+	fmt.Println(id)
+	// buf := bufio.NewReader(r.Body)
 
-	var file *os.File = nil
-	// check for file existence
-	_, err = os.Stat(drawingPathName)
-	// file doesn't exist, create
-	if err != nil {
-		file, err = os.Create(drawingPathName)
-		if err != nil {
-			fmt.Println(err)
-			slog.Error(err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-	} else {
-		// file exists already return error
-		slog.Info("file exists", slog.String("fileName", drawingPathName))
-		http.Error(w, "name for drawing already exists", http.StatusConflict)
-		return
-	}
-	defer file.Close()
-
-	marshaledDrawing, err := json.Marshal(&drawing)
-	if err != nil {
-		slog.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	_, err = file.Write(marshaledDrawing)
-	if err != nil {
-		slog.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	w.Write([]byte("success"))
 }
 
 func (app *application) postCompressedDrawing(w http.ResponseWriter, r *http.Request) {
@@ -237,4 +206,20 @@ func validateExcalidrawDrawing(drawingInfo *ExcalidrawDrawing) bool {
 
 	_, ok = elements.([]interface{})
 	return ok
+}
+
+func (app *application) streamHandler(w http.ResponseWriter, r *http.Request) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	for i := 1; i <= 5; i++ {
+		w.Write([]byte(fmt.Sprintf("Chunk %d\n", i))) // Write data to the buffer
+		if flusher != nil {
+			// flusher.Flush() // Immediately send the data to the client
+		}
+		time.Sleep(1 * time.Second) // Simulate delay between chunks
+	}
 }
