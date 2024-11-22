@@ -17,6 +17,7 @@ If you are using VSCode to edit, you can download the [Excalidraw extension](htt
 ## Setting up Environment
 
 You can use `nodemon` from `npm` to reload the server on file changes:
+`npm install -g nodemon`
 `npx nodemon --exec go run ./cmd/web --signal SIGTERM -e go`
 
 You can add flags at the front of the command:

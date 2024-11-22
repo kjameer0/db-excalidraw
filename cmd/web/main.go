@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 )
 
 // Define an application struct to hold the application-wide dependencies for the // web application.
@@ -21,13 +21,13 @@ type application struct {
 func init() {
 	// var drawingPath string
 	environment := os.Getenv("ENVIRONMENT")
-	if environment == "" {
-		err := godotenv.Load("./.env.local")
-		environment = os.Getenv("ENVIRONMENT")
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	// if environment == "" {
+	// 	err := godotenv.Load(".env.local")
+	// 	environment = os.Getenv("ENVIRONMENT")
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
 	fmt.Println("Program running in:", environment, "mode")
 }
 

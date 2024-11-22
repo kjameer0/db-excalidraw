@@ -29,7 +29,7 @@ func Test_application_getDrawingByName(t *testing.T) {
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest(http.MethodGet, "/drawing?name=example", nil),
+				r: httptest.NewRequest(http.MethodGet, "/drawing/lorem", nil),
 			},
 		},
 	}
