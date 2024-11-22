@@ -21,13 +21,6 @@ type fileWriter struct {
 	outputPath string
 }
 
-type drawingUploader interface {
-	Upload(p []byte) (int, error)
-}
-type localDrawingUploader struct {
-	outputPath string
-}
-
 func (f *fileWriter) Write(p []byte) (n int, err error) {
 	logFile := f.outputPath
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -51,7 +44,7 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 }
 
 func main() {
-	environment := flag.String("env", "development", "HTTP network address")
+	environment := flag.String("env", "development", "indicates production, testing, or development version of application")
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 	fmt.Printf("Application running in %s mode\n", *environment)
