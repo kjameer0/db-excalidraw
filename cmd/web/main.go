@@ -43,6 +43,14 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 	return bytesWritten, nil
 }
 
+// TODO: add production logging location
+// TODO: configure error handling centralization
+// FIXME: add the environment flag to application
+// TODO: add source and method to slog errors
+// TODO: create error handler functions
+// TODO: add routes file and move routes
+// TODO: write database connection function
+// TODO: connect to database
 func main() {
 	environment := flag.String("env", "development", "indicates production, testing, or development version of application")
 	addr := flag.String("addr", ":4000", "HTTP network address")
