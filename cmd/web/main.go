@@ -27,6 +27,7 @@ type dataSaver interface {
 
 func (tC *testReader) NewReader(nanoid string) (io.ReadCloser, error) {
 	pathName := tC.dataPath + string(filepath.Separator) + nanoid + ".txt"
+	fmt.Println(pathName)
 	f, err := os.Open(pathName)
 	// TODO: add user who did this failed get
 	if err != nil {

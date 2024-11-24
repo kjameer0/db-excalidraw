@@ -1,53 +1,49 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_application_getDrawingByName(t *testing.T) {
 	type fields struct {
-		logger *slog.Logger
+		logger    *slog.Logger
+		dataSaver dataSaver
 	}
 	type args struct {
-		w http.ResponseWriter
 		r *http.Request
 	}
+	dataSaver := testReader{dataPath: "../../test-drawings"}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
 	}{
 		{
-			name: "Valid request with existing drawing",
+			name: "Valid drawing retrieval",
 			fields: fields{
-				logger: slog.New(slog.NewJSONHandler(&bytes.Buffer{}, nil)),
+				logger:    slog.Default(),
+				dataSaver: &dataSaver,
 			},
 			args: args{
-				w: httptest.NewRecorder(),
-				r: httptest.NewRequest(http.MethodGet, "/drawing/lorem", nil),
+				r: httptest.NewRequest(http.MethodGet, "/drawing?name=lorem", nil),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			app := &application{
-				logger: tt.fields.logger,
+				logger:    tt.fields.logger,
+				dataSaver: tt.fields.dataSaver,
 			}
-
-			// Call the handler
-			fmt.Println(os.Getenv("GOPATH"))
-			app.getDrawingByName(tt.args.w, tt.args.r)
-			// Verify response
-			recorder := tt.args.w.(*httptest.ResponseRecorder)
-			if recorder.Code != http.StatusOK {
-				t.Errorf("expected status %d, got %d", http.StatusOK, recorder.Code)
-			}
+			w := httptest.NewRecorder()
+			app.getDrawingByName(w, tt.args.r)
+			// TODO: change this so that each test has an expected status code instead of hard coding it
+			assert.Equal(t, w.Result().StatusCode, http.StatusOK)
 		})
 	}
 }

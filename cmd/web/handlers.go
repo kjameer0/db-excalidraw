@@ -60,10 +60,10 @@ func neuter(next http.Handler) http.Handler {
 // TODO: Add error handling for edge cases
 // TODO: Add tests
 func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request) {
-	name := r.PathValue("name")
+	q := r.URL.Query()
+	name := q.Get("name")
 	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
-
 	stream, err := app.dataSaver.NewReader(name)
 	if err != nil {
 		app.serverError(w, r, err)
