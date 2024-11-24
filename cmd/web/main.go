@@ -9,11 +9,36 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
+	// "github.com/aws/aws-sdk-go/aws"
+	// "github.com/aws/aws-sdk-go/aws/session"
+	// "github.com/aws/aws-sdk-go/service/s3"
 )
+
+type awsConfig struct {
+	key string
+}
+type testReader struct {
+	dataPath string
+}
+type dataSaver interface {
+	NewReader(nanoid string) (io.ReadCloser, error)
+}
+
+func (tC *testReader) NewReader(nanoid string) (io.ReadCloser, error) {
+	pathName := tC.dataPath + string(filepath.Separator) + nanoid + ".txt"
+	f, err := os.Open(pathName)
+	// TODO: add user who did this failed get
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
+}
 
 // Define an application struct to hold the application-wide dependencies for the // web application.
 type application struct {
-	logger *slog.Logger
+	logger    *slog.Logger
+	dataSaver dataSaver
 }
 
 // for local writing during testing
@@ -40,13 +65,9 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 }
 
 // TODO: add production logging location
-// TODO: configure error handling centralization
-// FIXME: add the environment flag to application
-// TODO: add source and method to slog errors
-// TODO: create error handler functions
-// TODO: add routes file and move routes
 // TODO: write database connection function
 // TODO: connect to database
+// TODO: add compression for json
 func main() {
 	environment := flag.String("env", "development", "indicates production, testing, or development version of application")
 	addr := flag.String("addr", ":4000", "HTTP network address")
@@ -54,24 +75,14 @@ func main() {
 	fmt.Printf("Application running in %s mode\n", *environment)
 	// mux is the part of the app that guides requests
 	// to the url that matches their path
-	mux := http.NewServeMux()
 	writer := &fileWriter{outputPath: "log.txt"}
 	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
-	app := application{logger: logger}
+	var dataSaver dataSaver = &testReader{dataPath: "test-drawings"}
+	app := application{logger: logger, dataSaver: dataSaver}
 	slog.SetDefault(logger)
-	// the file server with assets comes from a specific folder
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	// StripPrefix gets rid of /static from the URL so we aren't searching
-	// for /static/static/path-to-asset
-	// create a get route for all assets
-	mux.Handle("GET /static/", http.StripPrefix("/static", neuter(fileServer)))
 
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /stream/{$}", app.streamHandler)
-	mux.HandleFunc("GET /drawing/{name}", app.getDrawingByName)
-	mux.HandleFunc("POST /drawing/{$}", app.postDrawing)
-	mux.HandleFunc("POST /compressed/drawing", app.postCompressedDrawing)
 	app.logger.Info("starting server", slog.String("addr", *addr))
+	mux := app.routes()
 
 	err := http.ListenAndServe(*addr, mux)
 	log.Fatal(err)

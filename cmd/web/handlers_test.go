@@ -2,14 +2,15 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
 func Test_application_getDrawingByName(t *testing.T) {
-	// godotenv.Load(".env.local")
 	type fields struct {
 		logger *slog.Logger
 	}
@@ -40,8 +41,8 @@ func Test_application_getDrawingByName(t *testing.T) {
 			}
 
 			// Call the handler
+			fmt.Println(os.Getenv("GOPATH"))
 			app.getDrawingByName(tt.args.w, tt.args.r)
-
 			// Verify response
 			recorder := tt.args.w.(*httptest.ResponseRecorder)
 			if recorder.Code != http.StatusOK {

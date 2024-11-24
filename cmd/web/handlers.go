@@ -64,28 +64,19 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 	name = strings.ReplaceAll(name, "/", "-")
 	name = path.Clean(name)
 
-	pathName := "./test-drawings/" + name + ".txt"
-	f, err := os.Open(pathName)
+	stream, err := app.dataSaver.NewReader(name)
 	if err != nil {
-		// TODO: add user who did this failed get
-		app.clientError(w, r, http.StatusNotFound, errors.New("file does not exist GET /drawing/{name} "+name))
+		app.serverError(w, r, err)
 		return
 	}
-	defer f.Close()
+	defer stream.Close()
 
-	fileInfo, err := f.Stat()
-	if err != nil {
-		app.serverError(w, r, errors.New("Failed to get file metadata"+pathName))
-		return
-	}
-	slog.Info("File transfer initiated", "fileByteSize", fileInfo.Size())
-
-	reader := bufio.NewReader(f)
+	bufferedStream := bufio.NewReader(stream)
 	// if we need more control over buffer size we can change io.copy to
-	//w.write and w.flush
-	_, err = io.Copy(w, reader)
+	//w.write and w.flush in a for loop or use second param of bufio.NewReader() function
+	_, err = io.Copy(w, bufferedStream)
 	if err != nil {
-		app.serverError(w, r, errors.New("Error sending drawing to client:" + name))
+		app.serverError(w, r, errors.New("Error sending drawing to client:"+name))
 		return
 	}
 }
@@ -102,7 +93,7 @@ func (app *application) postCompressedDrawing(w http.ResponseWriter, r *http.Req
 	if r.Header.Get("Content-Encoding") == "gzip" {
 		gzipReader, err := gzip.NewReader(r.Body)
 		if err != nil {
-			app.serverError(w,r, errors.New("failed to decompress payload"))
+			app.serverError(w, r, errors.New("failed to decompress payload"))
 			return
 		}
 		defer gzipReader.Close()
