@@ -68,6 +68,9 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 // TODO: write database connection function
 // TODO: connect to database
 // TODO: add compression for json
+// TODO: add writer for files and S3
+// TODO: add reader for S3
+// TODO: add shell scripts for prod and local
 func main() {
 	environment := flag.String("env", "development", "indicates production, testing, or development version of application")
 	addr := flag.String("addr", ":4000", "HTTP network address")
