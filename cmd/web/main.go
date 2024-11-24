@@ -31,10 +31,6 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 	defer file.Close()
 
 	bytesWritten, writeErr := file.Write(p)
-	if bytesWritten < len(p) {
-		return 0, fmt.Errorf("failure to write all data to %s", logFile)
-	}
-
 	if writeErr != nil {
 		log.Printf("Error writing to file %s: %v\n", logFile, writeErr)
 		return 0, writeErr
@@ -75,7 +71,7 @@ func main() {
 	mux.HandleFunc("GET /drawing/{name}", app.getDrawingByName)
 	mux.HandleFunc("POST /drawing/{$}", app.postDrawing)
 	mux.HandleFunc("POST /compressed/drawing", app.postCompressedDrawing)
-	logger.Info("starting server", slog.String("addr", *addr))
+	app.logger.Info("starting server", slog.String("addr", *addr))
 
 	err := http.ListenAndServe(*addr, mux)
 	log.Fatal(err)

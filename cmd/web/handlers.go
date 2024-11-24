@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -66,17 +67,16 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 	pathName := "./test-drawings/" + name + ".txt"
 	f, err := os.Open(pathName)
 	if err != nil {
-		//add user who did this failed get
-		slog.Info("file does not exist GET /drawing/{name} " + name)
-		http.NotFound(w, r)
+		// TODO: add user who did this failed get
+		app.clientError(w, r, http.StatusNotFound, errors.New("file does not exist GET /drawing/{name} "+name))
 		return
 	}
 	defer f.Close()
 
 	fileInfo, err := f.Stat()
 	if err != nil {
-		slog.Error("Failed to get file metadata" + pathName)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, errors.New("Failed to get file metadata"+pathName))
+		return
 	}
 	slog.Info("File transfer initiated", "fileByteSize", fileInfo.Size())
 
@@ -85,8 +85,7 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 	//w.write and w.flush
 	_, err = io.Copy(w, reader)
 	if err != nil {
-		slog.Error("Error sending drawing to client", "route", "GET /drawing/{name}", "drawing", name)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, errors.New("Error sending drawing to client:" + name))
 		return
 	}
 }
@@ -103,8 +102,7 @@ func (app *application) postCompressedDrawing(w http.ResponseWriter, r *http.Req
 	if r.Header.Get("Content-Encoding") == "gzip" {
 		gzipReader, err := gzip.NewReader(r.Body)
 		if err != nil {
-			slog.Error(err.Error(), "reason", "Failed to decompress payload")
-			http.Error(w, "Failed to decompress payload", http.StatusBadRequest)
+			app.serverError(w,r, errors.New("failed to decompress payload"))
 			return
 		}
 		defer gzipReader.Close()
