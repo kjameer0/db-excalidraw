@@ -20,8 +20,7 @@ You can use `nodemon` from `npm` to reload the server on file changes:
 `npm install -g nodemon`
 `npx nodemon --exec go run ./cmd/web --signal SIGTERM -e go`
 
-You can add flags at the front of the command:
-`ENVIRONMENT="integration" npx nodemon --exec go run ./cmd/web --signal SIGTERM -e go`
+`test.sh` contains the above `npx` command you can run to start the server with `source test.sh` if your terminal is in the root directory of the project.
 
 ### Environment variables
 

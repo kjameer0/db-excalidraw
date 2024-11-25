@@ -71,17 +71,18 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 // TODO: add compression for json
 // TODO: add writer for files and S3
 // TODO: add reader for S3
-// TODO: add shell scripts for prod and local
+//
 func main() {
 	environment := flag.String("env", "development", "indicates production, testing, or development version of application")
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	drawingDir := flag.String("drawing-dir", "test-drawing", "path to save drawings to")
 	flag.Parse()
 	fmt.Printf("Application running in %s mode\n", *environment)
 	// mux is the part of the app that guides requests
 	// to the url that matches their path
 	writer := &fileWriter{outputPath: "log.txt"}
 	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, writer), nil))
-	var dataSaver dataSaver = &testReader{dataPath: "test-drawings"}
+	var dataSaver dataSaver = &testReader{dataPath: *drawingDir}
 	app := application{logger: logger, dataSaver: dataSaver}
 	slog.SetDefault(logger)
 
