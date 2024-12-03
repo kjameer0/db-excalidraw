@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
+// Every test should have a proper status code
 func Test_application_getDrawingByName(t *testing.T) {
 	type fields struct {
 		logger    *slog.Logger

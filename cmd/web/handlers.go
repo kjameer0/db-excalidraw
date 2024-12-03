@@ -59,6 +59,7 @@ func neuter(next http.Handler) http.Handler {
 
 // TODO: Add error handling for edge cases
 // TODO: Add tests
+// TODO: write compression function
 func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	name := q.Get("name")
@@ -80,7 +81,8 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 		return
 	}
 }
-
+// TODO: write post request
+// expecting body {name: string, user: username string, }
 func (app *application) postDrawing(w http.ResponseWriter, r *http.Request) {
 	id := nanoid.New()
 	fmt.Println(id)
