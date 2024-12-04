@@ -67,6 +67,10 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 	name = path.Clean(name)
 	stream, err := app.dataSaver.NewReader(name)
 	if err != nil {
+		if os.IsNotExist(err) {
+			app.clientError(w, r, http.StatusNotFound, err)
+			return
+		}
 		app.serverError(w, r, err)
 		return
 	}
@@ -81,7 +85,9 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 		return
 	}
 }
+
 // TODO: write post request
+// TODO: make sure something over 10 MB can't be posted
 // expecting body {name: string, user: username string, }
 func (app *application) postDrawing(w http.ResponseWriter, r *http.Request) {
 	id := nanoid.New()

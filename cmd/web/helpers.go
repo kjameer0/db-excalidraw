@@ -18,7 +18,7 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 }
 
 func (app *application) clientError(w http.ResponseWriter,r *http.Request, status int, err error) {
-	//what else do i need to process a client erro
+	//what else do i need to process a client error
 	var (
 		method = r.Method
 		uri    = r.URL.RequestURI()
