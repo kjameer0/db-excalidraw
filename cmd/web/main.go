@@ -24,7 +24,7 @@ type testReader struct {
 type dataSaver interface {
 	NewReader(nanoid string) (io.ReadCloser, error)
 }
-
+// TODO: reader errors should handle non existence
 func (tC *testReader) NewReader(nanoid string) (io.ReadCloser, error) {
 	pathName := tC.dataPath + string(filepath.Separator) + nanoid + ".txt"
 	fmt.Println(pathName)

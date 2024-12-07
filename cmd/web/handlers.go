@@ -59,6 +59,7 @@ func neuter(next http.Handler) http.Handler {
 
 // TODO: Add error handling for edge cases
 // TODO: Add tests
+//thebidffedfkjgjfififjfeijfjdidjd
 // TODO: write compression function
 func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
