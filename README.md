@@ -37,7 +37,7 @@ To set up the database you might need to download psql.
 
 You might have to play around with your user permissions to get this file to run.
 
-You can seed the data**b**ase with this command
+You can seed the database with this command
 `psql -d excalidb -f internal/database/seed.sql`
 
 Full command:
