@@ -72,7 +72,6 @@ func (f *fileWriter) Write(p []byte) (n int, err error) {
 }
 
 // TODO: add production logging location
-// TODO: write database connection function
 // TODO: add compression for json
 // TODO: add writer for files
 // TODO: add writer for S3

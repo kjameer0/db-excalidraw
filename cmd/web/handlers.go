@@ -68,6 +68,7 @@ func (app *application) getDrawingByName(w http.ResponseWriter, r *http.Request)
 	name = path.Clean(name)
 	stream, err := app.dataSaver.NewReader(name)
 	if err != nil {
+		// TODO: create new error with Errors.New to catch if data not found for s3 and file system
 		if os.IsNotExist(err) {
 			app.clientError(w, r, http.StatusNotFound, err)
 			return
