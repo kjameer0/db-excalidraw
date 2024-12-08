@@ -37,18 +37,12 @@ To set up the database you might need to download psql.
 
 You might have to play around with your user permissions to get this file to run.
 
-You can seed the database with this command
+You can seed the data**b**ase with this command
 `psql -d excalidb -f internal/database/seed.sql`
 
 Full command:
 
 `psql -f internal/database/schema.sql;psql -d excalidb -f internal/database/seed.sql`
-
-## Copying Drawing
-
-If you have the `jq` command installed on your Unix system, you can run something like:
-`curl localhost:4000/drawing/hih | jq '.["drawingJson"]' | pbcopy`
-when you have a dev server live to copy a drawing directly to your clipboard.
 
 ## API usage
 

@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/aidarkhanov/nanoid v1.0.8
+	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.10.0
 )
 
